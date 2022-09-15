@@ -9,7 +9,7 @@ const db = mysql.createConnection(
       //enter your own username, otherwise root
       user: "root",
       //enter your own password
-      password: process.env.DB_PASSWORD,
+      password: "LogicProX10!",
       database: process.env.DB_DATABASE,
     }
   );
