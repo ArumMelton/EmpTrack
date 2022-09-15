@@ -71,7 +71,7 @@
 
 
 
-A command liine application that is designed to help keep track of your team. 
+EmpTrack is an employee tracking application that allows you to keep track of all employees in a database. The user can fully update the database as needed. 
 <br/>
 
 
