@@ -76,6 +76,36 @@ A command liine application that is designed to help keep track of your team.
 ![EmpScreen](/imgs/SQLDemoScreenshot.png)
 
 <h3 align="center">Demo Walkthroughs</h3>
+<br/>
+<h4 align="center">View Functionality Walkthrough</h4>
+
+
+https://user-images.githubusercontent.com/103224098/190510796-9c7a0845-091c-443a-b9f5-fd70378bea0b.mov
+
+
+
+<br/>
+
+
+
+
+<h4 align="center">Update/Delete Functionality Walkthrough</h4>
+
+
+
+https://user-images.githubusercontent.com/103224098/190511229-4b5971cc-5726-41c2-afc3-d1f5c96227cf.mov
+
+
+
+<br/>
+<h4 align="center">Bonus Functionality Walkthrough</h4>
+
+
+https://user-images.githubusercontent.com/103224098/190510944-1c793b95-024e-4729-8218-1f1f233bf7f9.mov
+
+
+<br/>
+
 
 
 
