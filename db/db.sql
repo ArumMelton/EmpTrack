@@ -1,3 +1,3 @@
-DROP DATABASE IF EXISTS Ebusiness;
-CREATE DATABASE Ebusiness;
-USE Ebusiness;
+DROP DATABASE IF EXISTS business;
+CREATE DATABASE business;
+USE business;
