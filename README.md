@@ -74,7 +74,7 @@
 
 
 
-EmpTrack is an employee tracking application that allows you to keep track of all employees in a database. The user can fully update the database as needed. 
+EmpTrack is an employee tracking node application that allows you to keep track of all employees in a database. The user can fully update the database as needed. 
 <br/>
 
 
