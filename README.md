@@ -25,6 +25,7 @@
 <h3 align="center">EmpTrack</h3>
 <br>
     ![EmpTrackScreen](/imgs/SQLDemoScreenshot.png)
+    
     <br>
   <p align="center">
     EmpTrack is an employee tracking application that allows you to keep track of all employees in a database. The user can fully update the database as needed.
