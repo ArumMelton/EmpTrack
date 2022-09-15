@@ -1,510 +1,474 @@
-//require
-const inquirer = require("inquirer");
 const logo = require("asciiart-logo");
+const consoleTable = require("console.table");
+const inquirer = require("inquirer");
 const db = require("./db/connection");
-const {
-  getDepartments,
-  addDepartment,
-  deleteDepartment,
-  departmentByBudget,
-} = require("./lib/Department");
-const { getRoles, addRole, deleteRole, updateRole } = require("./lib/Roles");
-const {
-  getEmployees,
-  viewEmployeeManager,
-  viewEmployeeRole,
-  updateEmployeeManager,
-  updateEmployeeRole,
-  addEmployee,
-  deleteEmployee,
-} = require("./lib/Employees");
+const connection = require("./db/connection");
 
-//Inquirer Arrays
-choicesArr = [
-  "View all departments",
-  "Add a department",
-  "Delete a department",
-  "View all roles",
-  "Add a role",
-  "Delete a role",
-  "Update a role's salary",
-  "View all employees",
-  "View an employee by their manager",
-  "View an employee by their role",
-  "Update an employee's role",
-  "Update an employee's manager",
-  "Add an employee",
-  "Delete an Employee",
-  "View the budget of each department",
-  "Quit",
-];
-
-addRoleInq = function (departmentChoices) {
-  return [
-    {
-      type: "text",
-      name: "title",
-      message: "What is the title of the new role?",
-      validate: (titleInput) => {
-        if (titleInput) {
-          return true;
-        } else {
-          console.log("Please enter the title of the new role.");
-          return false;
-        }
-      },
-    },
-    {
-      type: "text",
-      name: "salary",
-      message: "What is the salary of the new role?",
-      validate: (salaryInput) => {
-        if (salaryInput) {
-          return true;
-        } else {
-          console.log("Please enter the salary of the new role.");
-          return false;
-        }
-      },
-    },
-    {
-      type: "list",
-      name: "department",
-      message: "What is the department of the new role?",
-      choices: departmentChoices,
-    },
-  ];
-};
-
-updateRoleInq = function (roleChoices) {
-  return [
-    {
-      type: "list",
-      name: "title",
-      message: "Which role would you like to update?",
-      choices: roleChoices,
-    },
-    {
-      type: "text",
-      name: "salary",
-      message: "What is the new salary of the role?",
-      validate: (salaryInput) => {
-        if (salaryInput) {
-          return true;
-        } else {
-          console.log("Please enter the new salary.");
-          return false;
-        }
-      },
-    },
-  ];
-};
-
-addEmployeeInq = function (rolesChoices, managerChoices) {
-  return [
-    {
-      type: "text",
-      name: "first",
-      message: "What is the employee's first name?",
-      validate: (firstInput) => {
-        if (firstInput) {
-          return true;
-        } else {
-          console.log("Please enter the first name of the new employee.");
-          return false;
-        }
-      },
-    },
-    {
-      type: "text",
-      name: "last",
-      message: "What is the employee's last name?",
-      validate: (lastInput) => {
-        if (lastInput) {
-          return true;
-        } else {
-          console.log("Please enter the last name of the new employee.");
-          return false;
-        }
-      },
-    },
-    {
-      type: "list",
-      name: "role",
-      message: "Which role will this employee have?",
-      choices: rolesChoices,
-    },
-    {
-      type: "list",
-      name: "manager",
-      message: "Which manager will be the employee's manager?",
-      choices: managerChoices,
-    },
-  ];
-};
-
-updateEmployeeRoleInq = function (employeeChoices, rolesChoices) {
-  return [
-    {
-      type: "list",
-      name: "employee",
-      message: "Which employee would you like to update?",
-      choices: employeeChoices,
-    },
-    {
-      type: "list",
-      name: "role",
-      message: "Which role is the employee's new role?",
-      choices: rolesChoices,
-    },
-  ];
-};
-
-updateEmployeeManagerInq = function (employeeChoices, managerChoices) {
-  return [
-    {
-      type: "list",
-      name: "employee",
-      message: "Which employee would you like to update?",
-      choices: employeeChoices,
-    },
-    {
-      type: "list",
-      name: "manager",
-      message: "Which manager is the employee's new manager?",
-      choices: managerChoices,
-    },
-  ];
-};
-
-//functions to run the program
-welcomeMessage = function () {
+function launchApp() {
   console.log(
     logo({
       name: "Employee Tracker",
-      font: "Broadway KB",
-      lineChars: 10,
-      padding: 2,
-      margin: 2,
-      borderColor: "grey",
-      logoColor: "bold-blue",
-      textColor: "blue",
+      borderColor: "cyan",
+      logoColor: "bold-green",
     }).render()
   );
-  startProgram();
-};
+  mainPrompt();
+}
 
-startProgram = function () {
+function mainPrompt() {
   inquirer
     .prompt({
       type: "list",
-      name: "action",
+      name: "mainPrompt",
       message: "What would you like to do?",
-      choices: choicesArr,
+      choices: [
+        "View all departments",
+        "View all roles",
+        "View all employees",
+        "Add employee",
+        "Update employee",
+        "Remove employee",
+        "View employees by department",
+        "View employees by manager",
+        "Add role",
+        "Remove role",
+        "Add department",
+        "Remove department",
+        "View total budget by department",
+        "Quit",
+      ],
     })
-    .then(({ action }) => {
-      switch (action) {
+    .then((answers) => {
+      switch (answers.mainPrompt) {
         case "View all departments":
-          getDepartments();
-          break;
-        case "Add a department":
-          addDepartmentMethod();
-          break;
-        case "Delete a department":
-          deleteDepartmentMethod();
+          viewDepartments();
           break;
         case "View all roles":
-          getRoles();
-          break;
-        case "Add a role":
-          addRoleMethod();
-          break;
-        case "Delete a role":
-          deleteRoleMethod();
-          break;
-        case "Update a role's salary":
-          updateRoleMethod();
+          viewRoles();
           break;
         case "View all employees":
-          getEmployees();
+          viewEmployees();
           break;
-        case "View an employee by their manager":
-          viewManagerMethod();
+        case "Add employee":
+          newEmployee();
           break;
-        case "View an employee by their role":
-          viewRoleMethod();
+        case "Update employee":
+          updateEmployeeRole();
           break;
-        case "Update an employee's role":
-          updateEmployeeRoleMethod();
+        case "Add role":
+          newRole();
           break;
-        case "Update an employee's manager":
-          updateEmployeeManagerMethod();
+        case "Add department":
+          newDepartment();
           break;
-        case "Add an employee":
-          addEmployeeMethod();
+        case "Remove employee":
+          removeEmployee();
           break;
-        case "Delete an Employee":
-          deleteEmployeeMethod();
+        case "Remove role":
+          removeRole();
           break;
-        case "View the budget of each department":
-          departmentByBudget();
+        case "Remove department":
+          removeDepartment();
+          break;
+          case "View employees by department":
+          viewByDepartment();
+          break;
+        case "View employees by manager":
+          viewByManager();
+          break;
+        case "View total budget by department":
+          getBudjet();
           break;
         case "Quit":
-          console.log("Goodbye!");
           process.exit();
+        default:
+          console.log("Please choose an option");
       }
     });
 };
 
-addDepartmentMethod = function () {
+// ----------Inquirer functions--------------
+const newRoleQuestions = (companyDepartments) => {
+  return [
+    {
+      type: "input",
+      name: "title",
+      message: "What is the name of this role?"
+    },
+    {
+      type: "input",
+      name: "salary",
+      message: "What is the salary of this role?"
+    },
+    {
+      type: "list",
+      name: "department",
+      message: "Which department does this role belong to?",
+      choices: companyDepartments
+    }
+  ];
+};
+
+const newEmployeeQuestions = (companyRoles, companyManagers) => {
+  return [
+    {
+      type: "input",
+      name: "firstName",
+      message: "What is this employee's first name?"
+    },
+    {
+      type: "input",
+      name: "lastName",
+      message: "What is this employee's last name?"
+    },
+    {
+      type: "list",
+      name: "role",
+      message: "What is this employee's role?",
+      choices: companyRoles
+    },
+    {
+      type: "list",
+      name: "manager",
+      message: "Who is the employee's manager?",
+      choices: companyManagers
+    }
+  ];
+};
+
+const updateEmployeeQuestions = (employees, companyRoles) => {
+  return [
+    {
+      type: "list",
+      name: "employeeId",
+      message: "Which employee do you want to update?",
+      choices: employees
+    },
+    {
+      type: "list",
+      name: "roleId",
+      message: "What is this employee's updated role?",
+      choices: companyRoles
+    },
+    {
+      type: "list",
+      name: "managerId",
+      message: "Who is this employee's updated manager?",
+      choices: employees
+    }
+  ];
+};
+
+// ----------------------SQL generating functions------------
+
+// ---department functions----
+const viewDepartments = () => {
+  var sql = `SELECT * FROM department`;
+  connection.query(sql, (err, rows) => {
+    if (err) {
+      return;
+    }
+    console.table(rows);
+    mainPrompt();
+  });
+};
+
+const newDepartment = () => {
   inquirer
-    .prompt({
-      type: "text",
-      name: "name",
-      message: "What is the name of the new department?",
-      validate: (nameInput) => {
-        if (nameInput) {
-          return true;
-        } else {
-          console.log("Please enter the name of the new department.");
-          return false;
-        }
-      },
-    })
-    .then(({ name }) => {
-      console.log(`The ${name} department was added to the database.`);
-      addDepartment(name);
-    });
-};
-
-deleteDepartmentMethod = function () {
-  db.query(`SELECT name FROM department`, (err, rows) => {
-    const deptChoices = rows.map((row) => {
-      return { value: row.name, name: row.name };
-    });
-    inquirer
-      .prompt({
-        type: "list",
+    .prompt([
+      {
+        type: "input",
         name: "name",
-        message: "Which department would you like to delete?",
-        choices: deptChoices,
-      })
-      //destructure name from the prompt object
-      .then(({ name }) => {
-        console.log(`The ${name} department was deleted from the database.`);
-        deleteDepartment(name);
-      });
-  });
+        message: "What department would you like to add?",
+      },
+    ])
+    .then(({ name }) => {
+      const sql = `INSERT INTO department (department_name)
+      VALUES (?)`;
+      connection.query(sql, name),
+        (err, rows) => {
+          if (err) {
+            return;
+          }
+        };
+      console.log(`${name} added to the database`);
+      mainPrompt();
+    });
 };
 
-addRoleMethod = function () {
-  db.query(`SELECT id, name FROM department`, (err, rows) => {
-    const deptChoices = rows.map((row) => {
-      return { value: row.id, name: row.name };
-    });
-    const choices = addRoleInq(deptChoices);
-
-    inquirer
-      .prompt(choices)
-      //destructure name from the prompt object
-      .then(({ title, salary, department }) => {
-        console.log(`The ${title} role was added to the database.`);
-        addRole(title, salary, department);
-      });
-  });
-};
-
-deleteRoleMethod = function () {
-  db.query(`SELECT title FROM roles`, (err, rows) => {
-    const roleChoices = rows.map((row) => {
-      return { value: row.title, name: row.title };
-    });
-    inquirer
-      .prompt({
+const removeDepartment = () => {
+    connection.query(
+        `SELECT id, department_name FROM department`,
+        (err, rows) => {
+          const companyDepartments = rows.map((row) => {
+            return { value: row.id, name: row.department_name };
+          });
+      inquirer.prompt({
         type: "list",
-        name: "title",
-        message: "Which role would you like to delete?",
-        choices: roleChoices,
-      })
-      .then(({ title }) => {
-        console.log(`The ${title} role was deleted from the database.`);
-        deleteRole(title);
+        name: "departmentId",
+        message: "Which department would you like to remove?",
+        choices: companyDepartments
+      }).then(({ departmentId }) => {
+        const sql = `DELETE from department WHERE id = ?`;
+        const params = [departmentId]
+        connection.query(sql, params, (err, rows) => {
+            if (err) {
+                return;
+            }
+            console.log("Successfully removed from the databse");
+            mainPrompt();
+        });
       });
+    });
+};
+
+//  ------role functions---------
+const viewRoles = () => {
+  var sql = `SELECT role.id, role.title, role.salary, department.department_name 
+                AS department FROM role
+                LEFT JOIN department
+                ON role.department_id = department.id`;
+  connection.query(sql, (err, rows) => {
+    if (err) {
+      return;
+    }
+    console.table(rows);
+    mainPrompt();
   });
 };
 
-updateRoleMethod = function () {
-  db.query(`SELECT title FROM roles`, (err, rows) => {
-    const roleChoices = rows.map((row) => {
-      return { value: row.title, name: row.title };
-    });
-    const choices = updateRoleInq(roleChoices);
-    inquirer
-      .prompt(choices)
-      //destructure name from the prompt object
-      .then(({ title, salary }) => {
-        console.log(
-          `The salary for the ${title} role has been updated in the database.`
-        );
-        updateRole(title, salary);
+const newRole = () => {
+  connection.query(
+    `SELECT id, department_name FROM department`,
+    (err, rows) => {
+      const companyDepartments = rows.map((row) => {
+        return { value: row.id, name: row.department_name };
       });
-  });
+      const choices = newRoleQuestions(companyDepartments);
+      inquirer.prompt(choices).then(({ title, salary, department }) => {
+        const sql = `INSERT INTO role (title, salary, department_id)
+            VALUES (?, ?, ?)`;
+        const params = [title, salary, department];
+        connection.query(sql, params, (err, rows) => {
+          if (err) {
+            return;
+          }
+          console.log(`Successfully added ${title} to roles`);
+          mainPrompt();
+        });
+      });
+    }
+  );
 };
 
-viewManagerMethod = function () {
-  const sql = `SELECT e.id, CONCAT(e.first_name, " ", e.last_name) AS manager 
-    FROM employees as e 
-    LEFT JOIN roles ON e.role_id = roles.id 
-    LEFT JOIN department ON roles.department_id = department.id 
-    LEFT JOIN employees AS e2 ON e2.id = e.manager_id
-    WHERE e.manager_id IS NULL`;
-  db.query(sql, (err, rows) => {
-    const managerChoices = rows.map((row) => {
-      return { value: row.manager, name: row.manager };
-    });
-    inquirer
-      .prompt({
+const removeRole = () => {
+    connection.query(`SELECT id, title FROM role`, (err, rows) => {
+        const companyRoles = rows.map((row) => {
+          return { value: row.id, name: row.title };
+        });
+      inquirer.prompt({
         type: "list",
-        name: "manager",
-        message: "Select a manager to see their employees.",
-        choices: managerChoices,
-      })
-      .then(({ manager }) => {
-        viewEmployeeManager(manager);
+        name: "roleId",
+        message: "Which role would you like to remove?",
+        choices: companyRoles
+      }).then(({ roleId }) => {
+        const sql = `DELETE from role WHERE id = ?`;
+        const params = [roleId]
+        connection.query(sql, params, (err, rows) => {
+            if (err) {
+                return;
+            }
+            console.log("Successfully removed from the databse");
+            mainPrompt();
+        });
       });
+    });
+};
+
+// ---------employee functions--------
+const viewEmployees = () => {
+  var sql = `SELECT employee.id, CONCAT(employee.first_name, ' ', employee.last_name) AS name,
+                role.title AS role, role.salary AS salary, department.department_name AS department,
+                CONCAT(e2.first_name, ' ', e2.last_name) AS manager
+                FROM employee
+                LEFT JOIN role ON employee.role_id = role.id
+                LEFT JOIN department ON role.department_id = department.id
+                LEFT JOIN employee e2 ON employee.manager_id = e2.id`;
+  connection.query(sql, (err, rows) => {
+    if (err) {
+      return;
+    }
+    console.table(rows);
+    mainPrompt();
   });
 };
 
-viewRoleMethod = function () {
-  const sql = `SELECT id, title
-    FROM roles`;
-  db.query(sql, (err, rows) => {
-    const rolesChoices = rows.map((row) => {
+const newEmployee = () => {
+  connection.query(`SELECT id, title FROM role`, (err, rows) => {
+    const companyRoles = rows.map((row) => {
       return { value: row.id, name: row.title };
     });
-    inquirer
-      .prompt({
-        type: "list",
-        name: "role",
-        message: "Select the role to see the employees.",
-        choices: rolesChoices,
-      })
-      .then(({ role }) => {
-        viewEmployeeRole(role);
-      });
+
+    connection.query(
+      `SELECT id, CONCAT(first_name, ' ', last_name) AS name FROM employee WHERE employee.manager_id IS NULL`,
+      (err, rows) => {
+        const companyManagers = rows.map((row) => {
+          return { value: row.id, name: row.name };
+        });
+
+        const choices = newEmployeeQuestions(companyRoles, companyManagers);
+        inquirer
+          .prompt(choices)
+          .then(({ firstName, lastName, role, manager }) => {
+            const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
+            const params = [firstName, lastName, role, manager];
+            connection.query(sql, params, (err, rows) => {
+              if (err) {
+                return;
+              }
+              console.log(
+                `Successfully added ${firstName} ${lastName} to employees`
+              );
+              mainPrompt();
+            });
+          });
+      }
+    );
   });
 };
 
-updateEmployeeRoleMethod = function () {
-  db.query(
-    `SELECT CONCAT (first_name, " ", last_name) AS employee_name FROM employees`,
+const updateEmployeeRole = () => {
+  connection.query(
+    `SELECT id, CONCAT(first_name, ' ', last_name) AS name FROM employee`,
     (err, rows) => {
-      const employeeChoices = rows.map((row) => {
-        return { value: row.employee_name, name: row.employee_name };
+      const employees = rows.map((row) => {
+        return { value: row.id, name: row.name };
       });
-      db.query(
-        `SELECT id, title
-    FROM roles`,
+
+      connection.query(`SELECT id, title FROM role`, (err, rows) => {
+        const companyRoles = rows.map((row) => {
+          return { value: row.id, name: row.title };
+        });
+
+        const choices = updateEmployeeQuestions(employees, companyRoles);
+        inquirer.prompt(choices).then(({ roleId, managerId, employeeId }) => {
+          const sql = `UPDATE employee SET role_id = ?, manager_id = ?
+            WHERE id = ?`;
+          const params = [roleId, managerId, employeeId];
+          connection.query(sql, params, (err, rows) => {
+            if (err) {
+              return;
+            }
+            console.log(`Employee successfully updated`);
+            mainPrompt();
+          });
+        });
+      });
+    }
+  );
+};
+
+const removeEmployee = () => {
+    connection.query(`SELECT id, CONCAT(first_name, ' ', last_name) AS name FROM employee`,
+    (err, rows) => {
+      const employees = rows.map((row) => {
+        return { value: row.id, name: row.name };
+      });
+      inquirer.prompt({
+        type: "list",
+        name: "employeeId",
+        message: "Which employee would you like to remove?",
+        choices: employees
+      }).then(({ employeeId }) => {
+        const sql = `DELETE from employee WHERE id = ?`;
+        const params = [employeeId]
+        connection.query(sql, params, (err, rows) => {
+            if (err) {
+                return;
+            }
+            console.log("Successfully removed from the databse");
+            mainPrompt();
+        });
+      });
+    });
+};
+
+const viewByDepartment = () => {
+    connection.query(
+        `SELECT id, department_name FROM department`,
         (err, rows) => {
-          const rolesChoices = rows.map((row) => {
-            return { value: row.id, name: row.title };
-          });
-          const choices = updateEmployeeRoleInq(employeeChoices, rolesChoices);
-          inquirer.prompt(choices).then(({ employee, role }) => {
-            console.log(`${employee}'s role was updated in the database.`);
-            updateEmployeeRole(employee, role);
-          });
-        }
-      );
-    }
-  );
-};
-
-updateEmployeeManagerMethod = function () {
-  db.query(
-    `SELECT CONCAT (first_name, " ", last_name) AS employee_name FROM employees`,
-    (err, rows) => {
-      const employeeChoices = rows.map((row) => {
-        return { value: row.employee_name, name: row.employee_name };
-      });
-
-      const sql = `SELECT e.id, CONCAT(e.first_name, " ", e.last_name) AS manager 
-    FROM employees as e 
-    LEFT JOIN roles ON e.role_id = roles.id 
-    LEFT JOIN department ON roles.department_id = department.id 
-    LEFT JOIN employees AS e2 ON e2.id = e.manager_id
-    WHERE e.manager_id IS NULL`;
-      db.query(sql, (err, rows) => {
-        const managerChoices = rows.map((row) => {
-          return { value: row.id, name: row.manager };
-        });
-        const choices = updateEmployeeManagerInq(
-          employeeChoices,
-          managerChoices
-        );
-        inquirer.prompt(choices).then(({ employee, manager }) => {
-          console.log(`${employee}'s manager was updated in the database.`);
-          updateEmployeeManager(employee, manager);
-        });
-      });
-    }
-  );
-};
-
-addEmployeeMethod = function () {
-  db.query(
-    `SELECT e.role_id, roles.title AS title
-    FROM employees as e
-    LEFT JOIN roles ON e.role_id = roles.id
-    LEFT JOIN department ON roles.department_id = department.id
-    LEFT JOIN employees AS e2 ON e2.id = e.manager_id
-    WHERE roles.title IS NOT NULL`,
-    (err, rows) => {
-      const rolesChoices = rows.map((row) => {
-        return { value: row.role_id, name: row.title };
-      });
-      const sql = `SELECT e.manager_id, CONCAT(e2.first_name, " ", e2.last_name) AS manager 
-        FROM employees as e
-        LEFT JOIN roles ON e.role_id = roles.id
-        LEFT JOIN department ON roles.department_id = department.id 
-        LEFT JOIN employees AS e2 ON e2.id = e.manager_id
-        WHERE e.manager_id IS NOT NULL`;
-      db.query(sql, (err, rows) => {
-        const managerChoices = rows.map((row) => {
-          return { value: row.manager_id, name: row.manager };
-        });
-        const roleManager = addEmployeeInq(rolesChoices, managerChoices);
-        inquirer.prompt(roleManager).then(({ first, last, role, manager }) => {
-          console.log(`${first} ${last} was added to the database.`);
-          addEmployee(first, last, role, manager);
-        });
-      });
-    }
-  );
-};
-
-deleteEmployeeMethod = function () {
-  db.query(
-    `SELECT CONCAT (first_name, " ", last_name) AS employee_name FROM employees`,
-    (err, rows) => {
-      const employeeChoices = rows.map((row) => {
-        return { value: row.employee_name, name: row.employee_name };
-      });
-
-      inquirer
-        .prompt({
-          type: "list",
-          name: "employee",
-          message: "Which employee would you like to delete?",
-          choices: employeeChoices,
+          const companyDepartments = rows.map((row) => {
+            return { value: row.id, name: row.department_name };
         })
-        .then(({ employee }) => {
-          console.log(`${employee} has been deleted from the database.`);
-          deleteEmployee(employee);
+        inquirer.prompt({
+            type: 'list',
+            name: "departmentId",
+            message: "Which department would you like to view?",
+            choices: companyDepartments
+        }).then(({ departmentId }) => {
+            const sql = `SELECT CONCAT(employee.first_name, ' ', employee.last_name)
+                        AS name FROM employee LEFT JOIN role ON employee.role_id = role.id
+                        WHERE role.department_id = ?`
+            connection.query(sql, departmentId, (err, rows) => {
+                if (err) {
+                    return;
+                }
+                console.table(rows);
+                mainPrompt();
+            });
         });
-    }
-  );
+    });
 };
 
-//call welcome mesage
-welcomeMessage();
+const viewByManager = () => {
+    connection.query(
+        `SELECT id, CONCAT(first_name, ' ', last_name) AS name FROM employee WHERE employee.manager_id IS NULL`,
+        (err, rows) => {
+          const companyManagers = rows.map((row) => {
+            return { value: row.id, name: row.name };
+          })
+        inquirer.prompt({
+            type: 'list',
+            name: "managerId",
+            message: "Which manager would you like to view?",
+            choices: companyManagers
+        }).then(({ managerId }) => {
+            const sql = `SELECT CONCAT(first_name, ' ', last_name) AS name FROM employee where manager_id = ?`
+            connection.query(sql, managerId, (err, rows) => {
+                if (err) {
+                    return;
+                }
+                console.table(rows);
+                mainPrompt();
+            });
+        });
+    });
+};
+
+const getBudjet = () => {
+    connection.query(
+        `SELECT id, department_name FROM department`,
+        (err, rows) => {
+          const companyDepartments = rows.map((row) => {
+            return { value: row.id, name: row.department_name };
+        })
+        inquirer.prompt({
+            type: 'list',
+            name: 'departmentId',
+            message: "Which department's budjet would you like to view?",
+            choices: companyDepartments
+        }).then(({ departmentId }) => {
+            const sql = `SELECT sum(role.salary) as total FROM role WHERE role.department_id = ?`;
+            connection.query(sql, departmentId, (err, rows) => {
+                if (err) {
+                    return;
+                }
+                console.table(rows);
+                mainPrompt();
+            });
+        });
+    });
+};
+
+// init
+launchApp();
