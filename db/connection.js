@@ -2,6 +2,7 @@
 const mysql = require("mysql2");
 require('dotenv').config();
 
+
 //implementing middleware //
 const db = mysql.createConnection(
     {
